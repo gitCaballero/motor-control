@@ -1,0 +1,6 @@
+@MotorControl.Api_HostAddress = http://localhost:5138
+
+GET {{MotorControl.Api_HostAddress}}/motorcontrol/
+Accept: application/json
+
+###
