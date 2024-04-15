@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MotorControl.Api.Migrations
 {
     [DbContext(typeof(MotorControlDbContext))]
-    [Migration("20240413161028_Initial")]
+    [Migration("20240415000951_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
