@@ -1,7 +1,6 @@
 ﻿namespace MotorControl.Api.Entity
 {
-    public class MotorBase
-    {
+    public class MotorBase{
         public string Id { get; set; }
     }
 }

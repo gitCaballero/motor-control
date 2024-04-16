@@ -38,7 +38,7 @@ namespace MotorControl.Api.Repository
             return _context.motors.Where(u => u.MotorPlate == plate).FirstOrDefault()!;
         }
 
-        public void Update(Motor motor)
+        public bool Update(Motor motor)
         {
 
             var existingUser = _context.motors.FirstOrDefault(u => u.Id == motor.Id);
@@ -47,7 +47,9 @@ namespace MotorControl.Api.Repository
                 _context.ChangeTracker.Clear();
                 _context.Update(motor);
                 _context.SaveChanges();
+                return true;
             }
+            return false;
         }
     }
 }

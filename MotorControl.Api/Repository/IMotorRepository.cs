@@ -7,7 +7,7 @@ namespace MotorControl.Api.Repository
         IEnumerable<Motor> Get();
         Motor GetByPLate(string id);
         void Add(Motor motor);
-        void Update(Motor motor);
+        bool Update(Motor motor);
         void Delete(string id);
     }
 }

@@ -4,10 +4,6 @@ namespace MotorControl.Api.Models
 {
     public class MotorModel
     {
-        
-        [Display(Name = "MotorId")]
-        public string ?Id { get; set; } 
-
         [Required(ErrorMessage = "ModelYear Required")]
         [Display(Name = "ModelYear")]
         public string ModelYear { get; set; }

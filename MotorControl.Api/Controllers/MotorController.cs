@@ -26,11 +26,11 @@ namespace MotorControl.Api.Controllers
         /// <summary>
         /// motors - Search all registered motors
         /// </summary>
-        [ProducesResponseType(typeof(Response<MotorModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Response<MotorModel>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Response<MotorModel>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(Response<ShowMotorModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Response<ShowMotorModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(Response<ShowMotorModel>), StatusCodes.Status500InternalServerError)]
         [HttpGet("motors")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,delivery")]
         public async Task<ActionResult> Get()
         {
             try
@@ -208,16 +208,27 @@ namespace MotorControl.Api.Controllers
         [ProducesResponseType(typeof(Response<MotorModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Response<MotorModel>), StatusCodes.Status400BadRequest)]
         [HttpPut("update")]
-        public async Task<ActionResult> Update([FromBody] MotorModel motorModel)
+        public async Task<ActionResult> Update([FromBody] ShowMotorModel motorModel)
         {
             try
             {
-                _logger.LogInformation($"Updating motor  {motorModel.MotorPlate}  -  {MethodBase.GetCurrentMethod()!.Name}");
+                var plate = await Task.Run(() => _motorService.GetByPlate(motorModel.MotorPlate));
+                if (!string.IsNullOrEmpty(plate?.MotorPlate))
+                {
+                    return BadRequest($"Motor plate {plate.MotorPlate} exist can't do update");
+                }
 
-                await Task.Run(() => _motorService.Update(motorModel));
+                var flag = await Task.Run(() => _motorService.Update(motorModel));
+                
+                if (flag) 
+                {
+                    _logger.LogInformation($"Motor updated :{motorModel.MotorPlate}  -  {MethodBase.GetCurrentMethod()!.Name}");
+                    return Ok(true);
 
-                _logger.LogInformation($"Returning motor {motorModel.MotorPlate} - {MethodBase.GetCurrentMethod()!.Name}");
-                return Ok(true);
+                }
+
+                return BadRequest($"Id Motor {motorModel.Id} no exist");
+
             }
             catch (Exception ex)
             {

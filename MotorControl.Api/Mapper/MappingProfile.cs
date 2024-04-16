@@ -10,7 +10,7 @@ namespace MotorControl.Api.Mapper
         {
             CreateMap<MotorModel, Motor>();
             CreateMap<MotorModel, MotorBase>();
-            CreateMap<Motor, MotorModel>();
+            CreateMap<Motor, ShowMotorModel>();
         }
 
     }

@@ -27,15 +27,15 @@ namespace MotorControl.Api.Services
             _motorRepository.Delete(id);
         }
 
-        public IEnumerable<MotorModel> Get()
+        public IEnumerable<ShowMotorModel> Get()
         {
-            var motorsModel = new List<MotorModel>();
+            var motorsModel = new List<ShowMotorModel>();
             var motors = _motorRepository.Get();
             if (motors != null && motors.Any())
             {
                 foreach (var motor in motors)
                 {
-                    var motorModel = _mapper.Map<MotorModel>(motor);
+                    var motorModel = _mapper.Map<ShowMotorModel>(motor);
                     motorsModel.Add(motorModel);
                 }
                 return motorsModel;
@@ -43,20 +43,19 @@ namespace MotorControl.Api.Services
             return motorsModel;
         }
 
-        public MotorModel GetByPlate(string plate)
+        public ShowMotorModel GetByPlate(string plate)
         {
             var motor = _motorRepository.GetByPLate(plate);
-
-            var motorModel = _mapper.Map<MotorModel>(motor);
+            
+            var motorModel = _mapper.Map<ShowMotorModel>(motor);
 
             return motorModel;
         }
-
-        public void Update(MotorModel motorModel)
+        public bool Update(ShowMotorModel motorModel)
         {
             var motor = _mapper.Map<Motor>(motorModel);
-
-            _motorRepository.Update(motor);
+            motor.Id = motorModel.Id;
+            return _motorRepository.Update(motor);
         }
     }
 }

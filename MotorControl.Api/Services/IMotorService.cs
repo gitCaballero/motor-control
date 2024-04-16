@@ -5,10 +5,10 @@ namespace MotorControl.Api.Services
 {
     public interface IMotorService
     {
-        IEnumerable<MotorModel> Get();
-        MotorModel GetByPlate(string id);
+        IEnumerable<ShowMotorModel> Get();
+        ShowMotorModel GetByPlate(string plate);
         void Add(MotorModel motor);
-        void Update(MotorModel motor);
+        bool Update(ShowMotorModel motor);
         void Delete(string id);
     }
 }
