@@ -2,7 +2,7 @@
 
 namespace MotorControl.Api.Models
 {
-    public class MotorModel
+    public class MotorModelRequest
     {
         [Required(ErrorMessage = "ModelYear Required")]
         [Display(Name = "ModelYear")]

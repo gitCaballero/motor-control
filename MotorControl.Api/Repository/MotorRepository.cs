@@ -1,4 +1,5 @@
 ﻿using MotorControl.Api.Entity;
+using MotorControl.Api.Models;
 using MotorControl.Api.Repository.Context;
 
 namespace MotorControl.Api.Repository
@@ -20,10 +21,10 @@ namespace MotorControl.Api.Repository
 
         public void Delete(string plate)
         {
-            var user = _context.motors.FirstOrDefault(u => u.MotorPlate == plate);
-            if (user != null)
+            var motor = _context.motors.Where(x => x.MotorPlate == plate).FirstOrDefault()!;
+            if (motor != null)
             {
-                _context.motors.Remove(user);
+                _context.motors.Remove(motor);
                 _context.SaveChanges();
             }
         }
@@ -33,7 +34,12 @@ namespace MotorControl.Api.Repository
             return _context.motors;
         }
 
-        public Motor GetByPLate(string plate)
+        public Motor GetById(string id)
+        {
+            return _context.motors.Where(x => x.Id == id).FirstOrDefault()!;
+        }
+
+        public Motor GetByPlate(string plate)
         {
             return _context.motors.Where(u => u.MotorPlate == plate).FirstOrDefault()!;
         }
@@ -41,11 +47,15 @@ namespace MotorControl.Api.Repository
         public bool Update(Motor motor)
         {
 
-            var existingUser = _context.motors.FirstOrDefault(u => u.Id == motor.Id);
-            if (existingUser != null)
+            var existMotor = _context.motors.FirstOrDefault(u => u.Id == motor.Id);
+            if (existMotor != null)
             {
+                existMotor.Model = motor.Model ?? existMotor.Model;
+                existMotor.MotorPlate = motor.MotorPlate ?? existMotor.MotorPlate;
+                existMotor.IsAvalable = motor.IsAvalable;
+                existMotor.ModelYear = motor.ModelYear ?? existMotor.ModelYear;
                 _context.ChangeTracker.Clear();
-                _context.Update(motor);
+                _context.Update(existMotor);
                 _context.SaveChanges();
                 return true;
             }

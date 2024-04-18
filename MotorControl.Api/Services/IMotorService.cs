@@ -1,14 +1,14 @@
-﻿using MotorControl.Api.Entity;
-using MotorControl.Api.Models;
+﻿using MotorControl.Api.Models;
 
 namespace MotorControl.Api.Services
 {
     public interface IMotorService
     {
-        IEnumerable<ShowMotorModel> Get();
-        ShowMotorModel GetByPlate(string plate);
-        void Add(MotorModel motor);
-        bool Update(ShowMotorModel motor);
+        IEnumerable<MotorModelResponse> Get();
+        MotorModelResponse GetByPlate(string plate);
+        MotorModelResponse GetById(string id);
+        void Add(MotorModelRequest motor);
+        bool Update(MotorRequestUpdateModel motor);
         void Delete(string id);
     }
 }

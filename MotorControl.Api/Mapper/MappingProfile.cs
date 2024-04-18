@@ -8,10 +8,10 @@ namespace MotorControl.Api.Mapper
     {
         public MappingProfile()
         {
-            CreateMap<MotorModel, Motor>();
-            CreateMap<MotorModel, MotorBase>();
-            CreateMap<Motor, ShowMotorModel>();
+            CreateMap<MotorModelRequest, Motor>();
+            CreateMap<MotorRequestUpdateModel, Motor>();
+            CreateMap<MotorModelRequest, Base>();
+            CreateMap<Motor, MotorModelResponse>();
         }
-
     }
 }

@@ -5,7 +5,8 @@ namespace MotorControl.Api.Repository
     public interface IMotorRepository
     {
         IEnumerable<Motor> Get();
-        Motor GetByPLate(string id);
+        Motor GetByPlate(string plate);
+        Motor GetById(string id);
         void Add(Motor motor);
         bool Update(Motor motor);
         void Delete(string id);

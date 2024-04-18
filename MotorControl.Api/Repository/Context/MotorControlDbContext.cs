@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MotorControl.Api.Entity;
-using System.Reflection.Metadata;
 
 namespace MotorControl.Api.Repository.Context
 {
