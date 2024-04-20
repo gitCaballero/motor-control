@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MotorControl.Api.Migrations
 {
     [DbContext(typeof(MotorControlDbContext))]
-    [Migration("20240418030114_V1")]
-    partial class V1
+    [Migration("20240419190410_v1")]
+    partial class v1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,18 +31,22 @@ namespace MotorControl.Api.Migrations
                         .HasColumnType("text")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<bool>("IsAvalable")
-                        .HasColumnType("boolean");
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("IsAvalable")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Model")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ModelYear")
+                    b.Property<string>("Plate")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("MotorPlate")
+                    b.Property<string>("Year")
                         .IsRequired()
                         .HasColumnType("text");
 

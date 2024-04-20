@@ -5,7 +5,7 @@
 namespace MotorControl.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class Intial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,8 @@ namespace MotorControl.Api.Migrations
                     Id = table.Column<string>(type: "text", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     ModelYear = table.Column<string>(type: "text", nullable: false),
                     Model = table.Column<string>(type: "text", nullable: false),
-                    MotorPlate = table.Column<string>(type: "text", nullable: false)
+                    MotorPlate = table.Column<string>(type: "text", nullable: false),
+                    IsAvalable = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

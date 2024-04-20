@@ -10,5 +10,8 @@ namespace MotorControl.Api.Services
         void Add(MotorModelRequest motor);
         bool Update(MotorRequestUpdateModel motor);
         void Delete(string id);
+        IEnumerable<MotorModelResponse> GetMotorsAvailables();
+        bool PlateBelongsToAnotherMotor(MotorRequestUpdateModel motorModel);
+
     }
 }

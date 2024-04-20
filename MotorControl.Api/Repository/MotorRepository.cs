@@ -1,5 +1,4 @@
 ﻿using MotorControl.Api.Entity;
-using MotorControl.Api.Models;
 using MotorControl.Api.Repository.Context;
 
 namespace MotorControl.Api.Repository
@@ -15,13 +14,16 @@ namespace MotorControl.Api.Repository
 
         public void Add(Motor motor)
         {
+            motor.Plate = motor.Plate.ToUpper();
+            motor.Model = motor.Model.ToUpper();
+
             _context.motors.Add(motor);
             _context.SaveChanges();
         }
 
         public void Delete(string plate)
         {
-            var motor = _context.motors.Where(x => x.MotorPlate == plate).FirstOrDefault()!;
+            var motor = _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper()).FirstOrDefault()!;
             if (motor != null)
             {
                 _context.motors.Remove(motor);
@@ -33,6 +35,11 @@ namespace MotorControl.Api.Repository
         {
             return _context.motors;
         }
+        
+        public IEnumerable<Motor> GetMotorsAvailables()
+        {
+            return _context.motors.Where(x => x.IsAvalable == 1);
+        }
 
         public Motor GetById(string id)
         {
@@ -41,7 +48,8 @@ namespace MotorControl.Api.Repository
 
         public Motor GetByPlate(string plate)
         {
-            return _context.motors.Where(u => u.MotorPlate == plate).FirstOrDefault()!;
+            plate = plate.ToUpper();
+            return _context.motors.Where(u => u.Plate.ToUpper() == plate.ToUpper()).FirstOrDefault()!;
         }
 
         public bool Update(Motor motor)
@@ -50,10 +58,8 @@ namespace MotorControl.Api.Repository
             var existMotor = _context.motors.FirstOrDefault(u => u.Id == motor.Id);
             if (existMotor != null)
             {
-                existMotor.Model = motor.Model ?? existMotor.Model;
-                existMotor.MotorPlate = motor.MotorPlate ?? existMotor.MotorPlate;
+                existMotor.Plate = motor.Plate.ToUpper() ?? existMotor.Plate.ToUpper();
                 existMotor.IsAvalable = motor.IsAvalable;
-                existMotor.ModelYear = motor.ModelYear ?? existMotor.ModelYear;
                 _context.ChangeTracker.Clear();
                 _context.Update(existMotor);
                 _context.SaveChanges();

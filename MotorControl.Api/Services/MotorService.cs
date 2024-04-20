@@ -18,7 +18,7 @@ namespace MotorControl.Api.Services
         public void Add(MotorModelRequest motorModel)
         {
             var motor = _mapper.Map<Motor>(motorModel);
-            motor.IsAvalable = true;
+            motor.IsAvalable = 1;
 
             _motorRepository.Add(motor);
         }
@@ -43,6 +43,22 @@ namespace MotorControl.Api.Services
             }
             return motorsModel;
         }
+        
+        public IEnumerable<MotorModelResponse> GetMotorsAvailables()
+        {
+            var motorsModel = new List<MotorModelResponse>();
+            var motors = _motorRepository.GetMotorsAvailables();
+            if (motors.Any())
+            {
+                foreach (var motor in motors)
+                {
+                    var motorModel = _mapper.Map<MotorModelResponse>(motor);
+                    motorsModel.Add(motorModel);
+                }
+                return motorsModel;
+            }
+            return motorsModel;
+        }
 
         public MotorModelResponse GetById(string id)
         {
@@ -54,7 +70,7 @@ namespace MotorControl.Api.Services
         public MotorModelResponse GetByPlate(string plate)
         {
             var motor = _motorRepository.GetByPlate(plate);
-            
+
             var motorModel = _mapper.Map<MotorModelResponse>(motor);
 
             return motorModel;
@@ -62,7 +78,19 @@ namespace MotorControl.Api.Services
         public bool Update(MotorRequestUpdateModel motorModel)
         {
             var motor = _mapper.Map<Motor>(motorModel);
+            motor.IsAvalable = motorModel.IsAvailable;
             return _motorRepository.Update(motor);
+        }
+
+        public bool PlateBelongsToAnotherMotor(MotorRequestUpdateModel motorModel)
+        {
+            if (!string.IsNullOrEmpty(motorModel.Plate))
+            {
+                var existPlate = GetByPlate(motorModel.Plate!);
+                if (existPlate != null && existPlate.Id != motorModel.Id)
+                    return true;
+            }
+            return false;
         }
     }
 }

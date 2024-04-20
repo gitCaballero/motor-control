@@ -8,11 +8,10 @@ namespace MotorControl.Api.Models
         [Display(Name = "Id")]
         public string Id { get; set; }
 
-        [Required(ErrorMessage = "IsAvalable Required")]
-        [Display(Name = "IsAvalable")]
-        public bool? IsAvalable { get; set; }
-        public string? ModelYear { get; set; }
-        public string? Model { get; set; }
-        public string? MotorPlate { get; set; }
+        public int IsAvailable { get; set; }
+
+        [Required(ErrorMessage = "Plate Required")]
+        [Display(Name = "Plate")]
+        public string Plate { get; set; }
     }
 }

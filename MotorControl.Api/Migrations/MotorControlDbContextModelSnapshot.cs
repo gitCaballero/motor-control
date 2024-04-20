@@ -28,18 +28,22 @@ namespace MotorControl.Api.Migrations
                         .HasColumnType("text")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<bool>("IsAvalable")
-                        .HasColumnType("boolean");
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("IsAvalable")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Model")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ModelYear")
+                    b.Property<string>("Plate")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("MotorPlate")
+                    b.Property<string>("Year")
                         .IsRequired()
                         .HasColumnType("text");
 
