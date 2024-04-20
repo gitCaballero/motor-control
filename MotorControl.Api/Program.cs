@@ -19,8 +19,8 @@ builder.Services.AddDbContext<MotorControlDbContext>(
         options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("MotorControl.Api")));
 
-builder.Services.AddScoped<IMotorRepository, MotorRepository>();
-builder.Services.AddScoped<IMotorService, MotorService>();
+builder.Services.AddSingleton<IMotorRepository, MotorRepository>();
+builder.Services.AddSingleton<IMotorService, MotorService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
