@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MotorControl.Api.Extensions;
 using MotorControl.Api.Mapper;
 using MotorControl.Api.Repository;
 using MotorControl.Api.Repository.Context;
@@ -16,11 +17,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<MotorControlDbContext>(
-        options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
+        options => options.UseNpgsql(builder.Configuration.GetConnectionString("Database"),
         b => b.MigrationsAssembly("MotorControl.Api")));
 
-builder.Services.AddSingleton<IMotorRepository, MotorRepository>();
-builder.Services.AddSingleton<IMotorService, MotorService>();
+builder.Services.AddScoped<IMotorRepository, MotorRepository>();
+builder.Services.AddScoped<IMotorService, MotorService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -88,14 +89,15 @@ builder.Services.AddAuthentication(x =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+});
+
+app.ApplyMigrations();
 
 app.UseHttpsRedirection();
 

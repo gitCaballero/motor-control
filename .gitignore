@@ -7,3 +7,4 @@
 /.vs
 /MotorControl.Api/bin/Debug/net8.0
 /MotorControl.Api/obj
+/MotorControl.Api/.vs/MotorControl.Api/v17
