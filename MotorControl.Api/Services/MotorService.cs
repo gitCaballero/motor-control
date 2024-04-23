@@ -18,7 +18,7 @@ namespace MotorControl.Api.Services
         public void Add(MotorModelRequest motorModel)
         {
             var motor = _mapper.Map<Motor>(motorModel);
-            motor.IsAvalable = 1;
+            motor.IsAvailable = 1;
 
             _motorRepository.Add(motor);
         }
@@ -78,7 +78,7 @@ namespace MotorControl.Api.Services
         public bool Update(MotorRequestUpdateModel motorModel)
         {
             var motor = _mapper.Map<Motor>(motorModel);
-            motor.IsAvalable = motorModel.IsAvailable;
+            motor.IsAvailable = motorModel.IsAvailable;
             return _motorRepository.Update(motor);
         }
 

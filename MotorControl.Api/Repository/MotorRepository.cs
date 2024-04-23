@@ -39,13 +39,13 @@ namespace MotorControl.Api.Repository
         public IEnumerable<Motor> GetMotorsByAvailablesAndPlate(bool? available, string? plate)
         {
             if (available != null && plate == null)            
-                return _context.motors.Where(x => x.IsAvalable == (available == true ? 1 : 0));
+                return _context.motors.Where(x => x.IsAvailable == (available == true ? 1 : 0));
 
             if (available == null && plate != null)
                 return _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper());
             
             if (available != null && plate != null)
-                return _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper() && x.IsAvalable == (available == true ? 1 : 0));
+                return _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper() && x.IsAvailable == (available == true ? 1 : 0));
 
             return _context.motors;
 
@@ -69,7 +69,7 @@ namespace MotorControl.Api.Repository
             if (existMotor != null)
             {
                 existMotor.Plate = motor.Plate.ToUpper() ?? existMotor.Plate.ToUpper();
-                existMotor.IsAvalable = motor.IsAvalable;
+                existMotor.IsAvailable = motor.IsAvailable;
                 _context.ChangeTracker.Clear();
                 _context.Update(existMotor);
                 _context.SaveChanges();
