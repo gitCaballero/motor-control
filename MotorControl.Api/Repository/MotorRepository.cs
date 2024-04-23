@@ -36,9 +36,19 @@ namespace MotorControl.Api.Repository
             return _context.motors;
         }
         
-        public IEnumerable<Motor> GetMotorsAvailables()
+        public IEnumerable<Motor> GetMotorsByAvailablesAndPlate(bool? available, string? plate)
         {
-            return _context.motors.Where(x => x.IsAvalable == 1);
+            if (available != null && plate == null)            
+                return _context.motors.Where(x => x.IsAvalable == (available == true ? 1 : 0));
+
+            if (available == null && plate != null)
+                return _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper());
+            
+            if (available != null && plate != null)
+                return _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper() && x.IsAvalable == (available == true ? 1 : 0));
+
+            return _context.motors;
+
         }
 
         public Motor GetById(string id)

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace MotorControl.Api.Models
+﻿namespace MotorControl.Api.Models
 {
     public class MotorModelResponse : MotorModelRequest
     {

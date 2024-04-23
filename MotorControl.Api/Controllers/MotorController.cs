@@ -1,6 +1,5 @@
 ﻿using Azure;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MotorControl.Api.Models;
 using MotorControl.Api.Services;
@@ -10,7 +9,7 @@ using System.Reflection;
 
 namespace MotorControl.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("motors")]
     [ApiController]
     public class MotorController : ControllerBase
     {
@@ -24,57 +23,26 @@ namespace MotorControl.Api.Controllers
         }
 
         /// <summary>
-        /// motors - Search all motors registered
+        /// Search motors by availables and plate
         /// </summary>
         /// <remarks>
         /// Example:
         /// 
-        ///     GET /motors
+        ///     GET /motors?availables=true&plate=amv-20
         ///     
         /// </remarks>
         [ProducesResponseType(typeof(Response<List<MotorModelResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpGet("motors")]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult> Get()
-        {
-            try
-            {
-                _logger.LogInformation($"Searching all motors - {MethodBase.GetCurrentMethod()!.Name}");
-
-                var motors = await Task.Run(() => _motorService.Get());
-                _logger.LogInformation($"Returning {motors.Count()} motors - {MethodBase.GetCurrentMethod()!.Name}");
-
-                return Ok(motors.ToList());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"{ex.Message} - {MethodBase.GetCurrentMethod()!.Name}");
-                return BadRequest(ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// motors-avaliables - Search all motors availables
-        /// </summary>
-        /// <remarks>
-        /// Example:
-        /// 
-        ///     GET /motors-availables
-        ///     
-        /// </remarks>
-        [ProducesResponseType(typeof(Response<List<MotorModelResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpGet("motors-availables")]
+        [HttpGet]
         [Authorize(Roles = "admin,delivery")]
-        public async Task<ActionResult> GetMotorsAvailables()
+        public async Task<ActionResult> Get([FromQuery] bool ?availables, string ?plate)
         {
             try
             {
-                _logger.LogInformation($"Searching all motors avaliables - {MethodBase.GetCurrentMethod()!.Name}");
+                _logger.LogInformation($"Searching motors - {MethodBase.GetCurrentMethod()!.Name}");
 
-                var motors = await Task.Run(() => _motorService.GetMotorsAvailables());
-             
+                var motors = await Task.Run(() => _motorService.GetMotorsByAvailablesAndPlate(availables, plate));
+
                 _logger.LogInformation($"Returning {motors.Count()} motors - {MethodBase.GetCurrentMethod()!.Name}");
 
                 return Ok(motors.ToList());
@@ -85,48 +53,7 @@ namespace MotorControl.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-        /// <summary>
-        /// motor-plate - Search motor by plate
-        /// </summary>
-        /// <remarks>
-        /// Example:
-        /// 
-        ///     GET /motor-plate?plate={{plate}}
-        ///     
-        /// </remarks>
-        /// <param name="plate">motor plate</param>
-        [ProducesResponseType(typeof(Response<MotorModelResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpGet("motor-plate")]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult> GetByPlate(string plate)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(plate))
-                    return BadRequest($"Plate is required");
-
-                _logger.LogInformation($"Searching motor by plate - {MethodBase.GetCurrentMethod()!.Name}");
-
-                var motor = await Task.Run(() => _motorService.GetByPlate(plate));
-                if (motor != null)
-                {
-                    _logger.LogInformation($"Returning motor {motor.Plate} - {MethodBase.GetCurrentMethod()!.Name}");
-
-                    return Ok(motor);
-                }
-
-                _logger.LogInformation($"Motor {motor?.Plate} not found- {MethodBase.GetCurrentMethod()!.Name}");
-
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"{ex.Message} - {MethodBase.GetCurrentMethod()!.Name}");
-                return BadRequest(ex.Message);
-            }
-        }
+     
 
         /// <summary>
         /// create - create a new register motor
@@ -134,19 +61,19 @@ namespace MotorControl.Api.Controllers
         /// <remarks>
         /// Example:
         /// 
-        ///     POST /create
+        ///     POST 
         ///     {
-        ///             "modelYear": "2024",
+        ///             "year": "2024",
         ///             "identifier": "3456745678",
         ///             "model": "Honda",
-        ///             "motorPlate": "amv-18"
+        ///             "plate": "amv-18"
         ///     }
         /// </remarks>
         /// <param name="motorModel"></param>
         /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpPost("create")]
+        [HttpPost]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult> Create([FromBody] MotorModelRequest motorModel)
         {
@@ -162,7 +89,8 @@ namespace MotorControl.Api.Controllers
                 await Task.Run(() => _motorService.Add(motorModel));
                 _logger.LogInformation($"Adding motor - {MethodBase.GetCurrentMethod()!.Name}");
 
-                return StatusCode(StatusCodes.Status201Created);
+                var motorResponse = await Task.Run(() => _motorService.GetByPlate(motorModel.Plate!));
+                return StatusCode(StatusCodes.Status201Created,motorResponse);
 
             }
             catch (Exception ex)
@@ -178,14 +106,14 @@ namespace MotorControl.Api.Controllers
         /// <remarks>
         /// Example:
         /// 
-        ///     DELETE /delete?Plate={{Plate}}
+        ///     DELETE /plate
         ///    
         /// </remarks>
         [ProducesResponseType(typeof(Boolean), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Boolean), StatusCodes.Status400BadRequest)]
-        [HttpDelete("delete")]
+        [HttpDelete]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult> Delete(string plate)
+        public async Task<ActionResult> Delete([FromQuery] string plate)
         {
             try
             {
@@ -209,7 +137,8 @@ namespace MotorControl.Api.Controllers
                 await Task.Run(() => _motorService.Delete(plate));
                 _logger.LogInformation($"Deleting {plateExist} - {MethodBase.GetCurrentMethod()!.Name}");
 
-                return Ok(true);
+                return StatusCode(StatusCodes.Status204NoContent);
+
             }
             catch (Exception ex)
             {
@@ -235,9 +164,9 @@ namespace MotorControl.Api.Controllers
         /// </remarks>
         /// <param name="motorModel"></param>
         /// <returns></returns>
-        [ProducesResponseType(typeof(Response<Boolean>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Response<Boolean>), StatusCodes.Status202Accepted)]
         [ProducesResponseType(typeof(Response<Boolean>), StatusCodes.Status400BadRequest)]
-        [HttpPut("update")]
+        [HttpPut]
         [Authorize(Roles = "admin,delivery")]
         public async Task<ActionResult> Update([FromBody] MotorRequestUpdateModel motorModel)
         {
@@ -255,7 +184,8 @@ namespace MotorControl.Api.Controllers
                     if (flag)
                     {
                         _logger.LogInformation($"Motor {motorModel.Id} updated -  {MethodBase.GetCurrentMethod()!.Name}");
-                        return Ok(true);
+                        var motorResponse = await Task.Run(() => _motorService.GetByPlate(motorModel.Plate!));
+                        return StatusCode(StatusCodes.Status202Accepted, motorResponse);
                     }
                     return Ok(false);
                 }

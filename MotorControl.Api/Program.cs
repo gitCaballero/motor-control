@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<MotorControlDbContext>(
-        options => options.UseNpgsql(builder.Configuration.GetConnectionString("Database"),
+        options => options.UseNpgsql(builder.Configuration.GetConnectionString("Connection"),
         b => b.MigrationsAssembly("MotorControl.Api")));
 
 builder.Services.AddScoped<IMotorRepository, MotorRepository>();

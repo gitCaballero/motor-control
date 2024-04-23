@@ -44,10 +44,10 @@ namespace MotorControl.Api.Services
             return motorsModel;
         }
         
-        public IEnumerable<MotorModelResponse> GetMotorsAvailables()
+        public IEnumerable<MotorModelResponse> GetMotorsByAvailablesAndPlate(bool ?available, string ?plate)
         {
             var motorsModel = new List<MotorModelResponse>();
-            var motors = _motorRepository.GetMotorsAvailables();
+            var motors = _motorRepository.GetMotorsByAvailablesAndPlate(available, plate);
             if (motors.Any())
             {
                 foreach (var motor in motors)

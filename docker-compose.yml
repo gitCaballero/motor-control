@@ -1,0 +1,57 @@
+version: '3.4'
+
+services:
+  motorcontrol.api:
+    image: ${DOCKER_REGISTRY-}motorcontrol.api
+    depends_on: 
+        - "motor.database"
+    build:
+      context: .
+      dockerfile: MotorControl.Api/Dockerfile
+    ports:
+        - "5000:5000"
+        - "5001:5001"
+
+  motor.database:
+    image:  postgres:latest    
+    environment:
+    - POSTGRES_DB=MotorControl
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+        - 5433:5432
+    
+
+  user.database:  
+    image:  postgres:latest    
+    environment:
+    - POSTGRES_DB=UserControl
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+        - 5434:5432
+
+
+  rental.database:
+    image:  postgres:latest    
+    environment:
+    - POSTGRES_DB=RentalMotor
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+        - 5435:5432
+    
+volumes:
+  pgdata: 
+  
+
+
+
+
+

@@ -10,6 +10,6 @@ namespace MotorControl.Api.Repository
         void Add(Motor motor);
         bool Update(Motor motor);
         void Delete(string id);
-        IEnumerable<Motor> GetMotorsAvailables();
+        IEnumerable<Motor> GetMotorsByAvailablesAndPlate(bool ?available, string ?plate);
     }
 }
