@@ -23,7 +23,7 @@ namespace MotorControl.Api.Repository
 
         public void Delete(string plate)
         {
-            var motor = _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper()).FirstOrDefault()!;
+            var motor = _context.motors.Where(x => x.Plate.Equals(plate, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault()!;
             if (motor != null)
             {
                 _context.motors.Remove(motor);
@@ -42,10 +42,10 @@ namespace MotorControl.Api.Repository
                 return _context.motors.Where(x => x.IsAvailable == (available == true ? 1 : 0));
 
             if (available == null && plate != null)
-                return _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper());
+                return _context.motors.Where(x => x.Plate.ToUpper().Equals(plate.ToUpper()));
             
             if (available != null && plate != null)
-                return _context.motors.Where(x => x.Plate.ToUpper() == plate.ToUpper() && x.IsAvailable == (available == true ? 1 : 0));
+                return _context.motors.Where(x => x.Plate.ToUpper().Equals(plate.ToUpper()) && x.IsAvailable == (available == true ? 1 : 0));
 
             return _context.motors;
 
@@ -53,13 +53,13 @@ namespace MotorControl.Api.Repository
 
         public Motor GetById(string id)
         {
-            return _context.motors.Where(x => x.Id == id).FirstOrDefault()!;
+            return _context.motors.FindAsync(id).Result!;
         }
 
         public Motor GetByPlate(string plate)
         {
             plate = plate.ToUpper();
-            return _context.motors.Where(u => u.Plate.ToUpper() == plate.ToUpper()).FirstOrDefault()!;
+            return _context.motors.Where(u => u.Plate.ToUpper().Equals(plate)).FirstOrDefault()!;
         }
 
         public bool Update(Motor motor)

@@ -45,7 +45,7 @@ namespace MotorControl.Api.Controllers
 
                 _logger.LogInformation($"Returning {motors.Count()} motors - {MethodBase.GetCurrentMethod()!.Name}");
 
-                return Ok(motors.ToList());
+                return Ok(motors);
             }
             catch (Exception ex)
             {
@@ -128,7 +128,7 @@ namespace MotorControl.Api.Controllers
                     return BadRequest($"Plate {plate} no found");
                 }
 
-                if (plateExist.IsAvalable == 0)
+                if (plateExist.IsAvailable == 0)
                 {
                     _logger.LogInformation($"Plate {plateExist} cannot be removed because it is rented - {MethodBase.GetCurrentMethod()!.Name}");
                     return BadRequest($"Plate {plate} cannot be removed because it is rented");

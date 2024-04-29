@@ -32,7 +32,7 @@ namespace MotorControl.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("IsAvalable")
+                    b.Property<int>("IsAvailable")
                         .HasColumnType("integer");
 
                     b.Property<string>("Model")
