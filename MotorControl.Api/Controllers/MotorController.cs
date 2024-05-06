@@ -35,13 +35,13 @@ namespace MotorControl.Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Authorize(Roles = "admin,delivery")]
-        public async Task<ActionResult> Get([FromQuery] bool ?availables, string ?plate)
+        public async Task<ActionResult> Get([FromQuery] bool? availables, string? id, string? plate)
         {
             try
             {
                 _logger.LogInformation($"Searching motors - {MethodBase.GetCurrentMethod()!.Name}");
 
-                var motors = await Task.Run(() => _motorService.GetMotorsByAvailablesAndPlate(availables, plate));
+                var motors = await Task.Run(() => _motorService.GetMotorsByAvailablesIdAndPlate(availables, id, plate));
 
                 _logger.LogInformation($"Returning {motors.Count()} motors - {MethodBase.GetCurrentMethod()!.Name}");
 
@@ -53,7 +53,6 @@ namespace MotorControl.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-     
 
         /// <summary>
         /// create - create a new register motor
@@ -79,8 +78,8 @@ namespace MotorControl.Api.Controllers
         {
             try
             {
-                var plate = _motorService.GetByPlate(motorModel.Plate)?.Plate;
-                if (!string.IsNullOrEmpty(plate))
+                var plate = _motorService.GetMotorsByAvailablesIdAndPlate(plate: motorModel.Plate);
+                if (!plate.Any())
                 {
                     _logger.LogInformation($"Motor {plate} is already registered - {MethodBase.GetCurrentMethod()!.Name}");
                     return BadRequest("Motor plate exist");
@@ -89,8 +88,8 @@ namespace MotorControl.Api.Controllers
                 await Task.Run(() => _motorService.Add(motorModel));
                 _logger.LogInformation($"Adding motor - {MethodBase.GetCurrentMethod()!.Name}");
 
-                var motorResponse = await Task.Run(() => _motorService.GetByPlate(motorModel.Plate!));
-                return StatusCode(StatusCodes.Status201Created,motorResponse);
+                var motorResponse = await Task.Run(() => _motorService.GetMotorsByAvailablesIdAndPlate(plate: motorModel.Plate!));
+                return StatusCode(StatusCodes.Status201Created, motorResponse);
 
             }
             catch (Exception ex)
@@ -120,18 +119,18 @@ namespace MotorControl.Api.Controllers
                 if (string.IsNullOrEmpty(plate))
                     return BadRequest("Plate is required");
 
-                var plateExist = _motorService.GetByPlate(plate);
+                var plateExist = _motorService.GetMotorsByAvailablesIdAndPlate(plate: plate);
 
-                if (plateExist == null)
+                if (!plateExist.Any())
                 {
                     _logger.LogInformation($"Plate {plateExist} not found - {MethodBase.GetCurrentMethod()!.Name}");
                     return BadRequest($"Plate {plate} no found");
                 }
 
-                if (plateExist.IsAvailable == 0)
+                if (plateExist.FirstOrDefault()!.IsAvailable == 0)
                 {
-                    _logger.LogInformation($"Plate {plateExist} cannot be removed because it is rented - {MethodBase.GetCurrentMethod()!.Name}");
-                    return BadRequest($"Plate {plate} cannot be removed because it is rented");
+                    _logger.LogInformation($"Plate {plateExist.FirstOrDefault()!.Plate} cannot be removed because it is rented - {MethodBase.GetCurrentMethod()!.Name}");
+                    return BadRequest($"Plate {plateExist.FirstOrDefault()!.Plate} cannot be removed because it is rented");
                 }
 
                 await Task.Run(() => _motorService.Delete(plate));
@@ -164,32 +163,29 @@ namespace MotorControl.Api.Controllers
         /// </remarks>
         /// <param name="motorModel"></param>
         /// <returns></returns>
-        [ProducesResponseType(typeof(Response<Boolean>), StatusCodes.Status202Accepted)]
-        [ProducesResponseType(typeof(Response<Boolean>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(Response<MotorModelResponse>), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPut]
         [Authorize(Roles = "admin,delivery")]
         public async Task<ActionResult> Update([FromBody] MotorRequestUpdateModel motorModel)
         {
             try
             {
-                var motor = await Task.Run(() => _motorService.GetById(motorModel.Id));
+                var motor = await Task.Run(() => _motorService.GetMotorsByAvailablesIdAndPlate(id: motorModel.Id));
                 if (motor != null)
                 {
                     var exist = await Task.Run(() => _motorService.PlateBelongsToAnotherMotor(motorModel));
                     if (exist)
                         return BadRequest($"Plate {motorModel.Plate} belongs to another motorcycle");
 
-                    var flag = await Task.Run(() => _motorService.Update(motorModel));
+                    var motorResponse = await Task.Run(() => _motorService.Update(motorModel));
+                    
+                    _logger.LogInformation($"Motor {motorResponse.Id} updated -  {MethodBase.GetCurrentMethod()!.Name}");
+                    
+                    return StatusCode(StatusCodes.Status202Accepted, motorResponse);
 
-                    if (flag)
-                    {
-                        _logger.LogInformation($"Motor {motorModel.Id} updated -  {MethodBase.GetCurrentMethod()!.Name}");
-                        var motorResponse = await Task.Run(() => _motorService.GetByPlate(motorModel.Plate!));
-                        return StatusCode(StatusCodes.Status202Accepted, motorResponse);
-                    }
-                    return Ok(false);
                 }
-                return BadRequest($"Motor {motorModel.Id} not exist and can't do update");
+                return BadRequest($"Motor {motorModel.Id} unavailable and can't do update");
             }
             catch (Exception ex)
             {

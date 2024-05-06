@@ -5,22 +5,22 @@ using MotorControl.Api.Repository;
 
 namespace MotorControl.Api.Services
 {
-    public class MotorService : IMotorService
+    public class MotorService(IMotorRepository motorRepository, IMapper mapper) : IMotorService
     {
-        public readonly IMotorRepository _motorRepository;
-        private readonly IMapper _mapper;
+        public readonly IMotorRepository _motorRepository = motorRepository;
+        private readonly IMapper _mapper = mapper;
 
-        public MotorService(IMotorRepository motorRepository, IMapper mapper)
-        {
-            _motorRepository = motorRepository;
-            _mapper = mapper;
-        }
-        public void Add(MotorModelRequest motorModel)
+        public MotorModelResponse Add(MotorModelRequest motorModel)
         {
             var motor = _mapper.Map<Motor>(motorModel);
             motor.IsAvailable = 1;
 
-            _motorRepository.Add(motor);
+            var response = _motorRepository.Add(motor);
+
+            var result = _mapper.Map<MotorModelResponse>(response);
+
+            return result;
+
         }
 
         public void Delete(string plate)
@@ -28,26 +28,10 @@ namespace MotorControl.Api.Services
             _motorRepository.Delete(plate);
         }
 
-        public IEnumerable<MotorModelResponse> Get()
+        public IEnumerable<MotorModelResponse> GetMotorsByAvailablesIdAndPlate(bool ?available = null, string ?id = null, string ?plate = null)
         {
             var motorsModel = new List<MotorModelResponse>();
-            var motors = _motorRepository.Get();
-            if (motors != null && motors.Any())
-            {
-                foreach (var motor in motors)
-                {
-                    var motorModel = _mapper.Map<MotorModelResponse>(motor);
-                    motorsModel.Add(motorModel);
-                }
-                return motorsModel;
-            }
-            return motorsModel;
-        }
-        
-        public IEnumerable<MotorModelResponse> GetMotorsByAvailablesAndPlate(bool ?available, string ?plate)
-        {
-            var motorsModel = new List<MotorModelResponse>();
-            var motors = _motorRepository.GetMotorsByAvailablesAndPlate(available, plate);
+            var motors = _motorRepository.GetMotorsByAvailablesIdAndPlate(available, id, plate);
             if (motors.Any())
             {
                 foreach (var motor in motors)
@@ -60,34 +44,21 @@ namespace MotorControl.Api.Services
             return motorsModel;
         }
 
-        public MotorModelResponse GetById(string id)
-        {
-            var motor = _motorRepository.GetById(id);
-            var motorResponse = _mapper.Map<MotorModelResponse>(motor);
-            return motorResponse;
-        }
-
-        public MotorModelResponse GetByPlate(string plate)
-        {
-            var motor = _motorRepository.GetByPlate(plate);
-
-            var motorModel = _mapper.Map<MotorModelResponse>(motor);
-
-            return motorModel;
-        }
-        public bool Update(MotorRequestUpdateModel motorModel)
+        public MotorModelResponse Update(MotorRequestUpdateModel motorModel)
         {
             var motor = _mapper.Map<Motor>(motorModel);
             motor.IsAvailable = motorModel.IsAvailable;
-            return _motorRepository.Update(motor);
+            var response =  _motorRepository.Update(motor);
+            var result = _mapper.Map<MotorModelResponse>(response);
+            return result;
         }
 
         public bool PlateBelongsToAnotherMotor(MotorRequestUpdateModel motorModel)
         {
             if (!string.IsNullOrEmpty(motorModel.Plate))
             {
-                var existPlate = GetByPlate(motorModel.Plate!);
-                if (existPlate != null && existPlate.Id != motorModel.Id)
+                var existPlate = GetMotorsByAvailablesIdAndPlate(plate: motorModel.Plate!);
+                if (!existPlate.Any() && existPlate.FirstOrDefault()!.Id != motorModel.Id)
                     return true;
             }
             return false;

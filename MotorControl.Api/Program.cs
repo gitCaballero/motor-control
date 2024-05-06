@@ -7,6 +7,9 @@ using MotorControl.Api.Mapper;
 using MotorControl.Api.Repository;
 using MotorControl.Api.Repository.Context;
 using MotorControl.Api.Services;
+using RentalMotor.Api.Services.Network;
+using RentalMotor.Api.Services.Network.MessageConsumer;
+using RentalMotor.Api.Services.Network.MessageSender;
 using System.Reflection;
 using System.Text;
 
@@ -22,6 +25,8 @@ builder.Services.AddDbContext<MotorControlDbContext>(
 
 builder.Services.AddScoped<IMotorRepository, MotorRepository>();
 builder.Services.AddScoped<IMotorService, MotorService>();
+builder.Services.AddScoped<IRabbitMQMessageSender, RabbitMQMessageSender>();
+builder.Services.AddHostedService<RabbitMQMessageConsumer>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 

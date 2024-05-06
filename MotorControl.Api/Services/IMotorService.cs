@@ -4,13 +4,10 @@ namespace MotorControl.Api.Services
 {
     public interface IMotorService
     {
-        IEnumerable<MotorModelResponse> Get();
-        MotorModelResponse GetByPlate(string plate);
-        MotorModelResponse GetById(string id);
-        void Add(MotorModelRequest motor);
-        bool Update(MotorRequestUpdateModel motor);
+        MotorModelResponse Add(MotorModelRequest motor);
+        MotorModelResponse Update(MotorRequestUpdateModel motor);
         void Delete(string id);
-        IEnumerable<MotorModelResponse> GetMotorsByAvailablesAndPlate(bool ?available, string ?plate);
+        IEnumerable<MotorModelResponse> GetMotorsByAvailablesIdAndPlate(bool? available = null, string? id = null, string? plate = null);
         bool PlateBelongsToAnotherMotor(MotorRequestUpdateModel motorModel);
 
     }
