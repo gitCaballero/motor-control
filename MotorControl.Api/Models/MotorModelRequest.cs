@@ -1,6 +1,6 @@
 ﻿namespace MotorControl.Api.Models
 {
-    public class MotorModelRequest : BaseMessage
+    public class MotorModelRequest
     {
         public required string Year { get; set; }
         public required string Identifier { get; set; }

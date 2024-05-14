@@ -2,13 +2,15 @@
 using MotorControl.Api.Entity;
 using MotorControl.Api.Models;
 using MotorControl.Api.Repository;
+using RentalMotor.Api.Services.Network.MessageSender;
 
 namespace MotorControl.Api.Services
 {
-    public class MotorService(IMotorRepository motorRepository, IMapper mapper) : IMotorService
+    public class MotorService(IMotorRepository motorRepository, IMapper mapper, IRabbitMQMessageSender rabbitMQMessageSender) : IMotorService
     {
         public readonly IMotorRepository _motorRepository = motorRepository;
         private readonly IMapper _mapper = mapper;
+        private readonly IRabbitMQMessageSender _rabbitMQMessageSender = rabbitMQMessageSender;
 
         public MotorModelResponse Add(MotorModelRequest motorModel)
         {
@@ -19,8 +21,11 @@ namespace MotorControl.Api.Services
 
             var result = _mapper.Map<MotorModelResponse>(response);
 
-            return result;
+            IEnumerable<MotorModelResponse> motors = [result];
 
+            _rabbitMQMessageSender.SendMessage(motors, "motor-registered");
+
+            return result;
         }
 
         public void Delete(string plate)
@@ -28,7 +33,7 @@ namespace MotorControl.Api.Services
             _motorRepository.Delete(plate);
         }
 
-        public IEnumerable<MotorModelResponse> GetMotorsByAvailablesIdAndPlate(bool ?available = null, string ?id = null, string ?plate = null)
+        public IEnumerable<MotorModelResponse> GetMotorsByAvailablesIdAndPlate(bool? available = null, string? id = null, string? plate = null)
         {
             var motorsModel = new List<MotorModelResponse>();
             var motors = _motorRepository.GetMotorsByAvailablesIdAndPlate(available, id, plate);
@@ -39,6 +44,9 @@ namespace MotorControl.Api.Services
                     var motorModel = _mapper.Map<MotorModelResponse>(motor);
                     motorsModel.Add(motorModel);
                 }
+                if (available == true)
+                    _rabbitMQMessageSender.SendMessage(motorsModel, "motors-availabel");
+
                 return motorsModel;
             }
             return motorsModel;
@@ -46,10 +54,15 @@ namespace MotorControl.Api.Services
 
         public MotorModelResponse Update(MotorRequestUpdateModel motorModel)
         {
-            var motor = _mapper.Map<Motor>(motorModel);
+            var motor = _motorRepository.GetMotorsByAvailablesIdAndPlate(id: motorModel.Id).FirstOrDefault();
+            motor.Plate = motorModel.Plate.ToUpper();
             motor.IsAvailable = motorModel.IsAvailable;
-            var response =  _motorRepository.Update(motor);
+
+            var response = _motorRepository.Update(motor);
             var result = _mapper.Map<MotorModelResponse>(response);
+            IEnumerable<MotorModelResponse> motorsResponse = [result];
+            _rabbitMQMessageSender.SendMessage(motorsResponse, "motor-updated");
+
             return result;
         }
 
@@ -58,7 +71,7 @@ namespace MotorControl.Api.Services
             if (!string.IsNullOrEmpty(motorModel.Plate))
             {
                 var existPlate = GetMotorsByAvailablesIdAndPlate(plate: motorModel.Plate!);
-                if (!existPlate.Any() && existPlate.FirstOrDefault()!.Id != motorModel.Id)
+                if (existPlate.Any() && existPlate.FirstOrDefault()!.Id != motorModel.Id)
                     return true;
             }
             return false;

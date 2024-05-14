@@ -35,13 +35,13 @@ namespace MotorControl.Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Authorize(Roles = "admin,delivery")]
-        public async Task<ActionResult> Get([FromQuery] bool? availables, string? id, string? plate)
+        public async Task<ActionResult> Get([FromQuery] bool? available, string? id, string? plate)
         {
             try
             {
                 _logger.LogInformation($"Searching motors - {MethodBase.GetCurrentMethod()!.Name}");
 
-                var motors = await Task.Run(() => _motorService.GetMotorsByAvailablesIdAndPlate(availables, id, plate));
+                var motors = await Task.Run(() => _motorService.GetMotorsByAvailablesIdAndPlate(available, id, plate));
 
                 _logger.LogInformation($"Returning {motors.Count()} motors - {MethodBase.GetCurrentMethod()!.Name}");
 
@@ -79,16 +79,15 @@ namespace MotorControl.Api.Controllers
             try
             {
                 var plate = _motorService.GetMotorsByAvailablesIdAndPlate(plate: motorModel.Plate);
-                if (!plate.Any())
+                if (plate.Any())
                 {
                     _logger.LogInformation($"Motor {plate} is already registered - {MethodBase.GetCurrentMethod()!.Name}");
                     return BadRequest("Motor plate exist");
                 }
 
-                await Task.Run(() => _motorService.Add(motorModel));
+                var motorResponse = await Task.Run(() => _motorService.Add(motorModel));
                 _logger.LogInformation($"Adding motor - {MethodBase.GetCurrentMethod()!.Name}");
 
-                var motorResponse = await Task.Run(() => _motorService.GetMotorsByAvailablesIdAndPlate(plate: motorModel.Plate!));
                 return StatusCode(StatusCodes.Status201Created, motorResponse);
 
             }

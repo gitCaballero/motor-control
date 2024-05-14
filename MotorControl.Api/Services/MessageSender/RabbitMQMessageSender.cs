@@ -29,33 +29,29 @@ namespace RentalMotor.Api.Services.Network
 
         }
 
-        public void SendMessage(IEnumerable<BaseMessage> messages, string queueName, string typeObject)
+        public void SendMessage(IEnumerable<BaseMessage> messages, string queueName)
         {
-           
             _channel.QueueDeclare(queue: queueName, false, false, false, arguments: null);
 
-            foreach (var message in messages)
-            {
-                byte[] body = GetMessageAssByteArray(message, typeObject);
+            byte[] body = GetMessageAssByteArray(messages);
 
-                _channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
-            }
+            _channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
         }
 
-        private static byte[] GetMessageAssByteArray(BaseMessage message, string typeObject)
+        private static byte[] GetMessageAssByteArray(IEnumerable<BaseMessage> messages)
         {
             var json = string.Empty;
-
+            var typeObject = messages.FirstOrDefault()!.GetType().Name;
             var options = new JsonSerializerOptions { WriteIndented = true };
             switch (typeObject)
             {
                 case "MotorModelResponse":
-                    json = JsonSerializer.Serialize<MotorModelResponse>((MotorModelResponse)message, options);
+                    json = JsonSerializer.Serialize<IEnumerable<MotorModelResponse>>((IEnumerable<MotorModelResponse>)messages, options);
                     break;
 
                 default:
                     break;
-                    
+
             }
             var body = Encoding.UTF8.GetBytes(json);
             return body;

@@ -24,7 +24,7 @@ namespace MotorControl.Api.Repository
 
         public void Delete(string plate)
         {
-            var motor = _context.motors.Where(x => x.Plate.Equals(plate, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault()!;
+            var motor = _context.motors.Where(x => x.Plate.ToUpper().Equals(plate.ToUpper())).FirstOrDefault()!;
             if (motor != null)
             {
                 _context.motors.Remove(motor);
